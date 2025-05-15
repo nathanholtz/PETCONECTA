@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 //helpers
 const createUsertoken = require('../helpers/create-user-token')
 const getToken = require('../helpers/get-token')
-const { JsonWebTokenError } = require('jsonwebtoken')
+const getUserByToken = require('../helpers/get-user-by-token')
 
 
 module.exports = class UserController{
@@ -142,8 +142,73 @@ module.exports = class UserController{
 
     static async editUser(req,res){
         
-        res.status(422).json({message: 'deu certo'})
+       const id = req.params.id
+
+       const {nome, email, telefone, senha, confirmasenha} = req.body
+
+        //check if user exists
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(req.file){
+            user.image = req.file.filename
+        }
+
+        //validations 
+               
+        if(!nome){
+            res.status(422).json({message: 'O nome é obrigatório!'})
+            return
+        }
+
+        user.nome = nome
+
+        if(!email){
+            res.status(422).json({message: 'O email é obrigatório!'})
+            return
+        }
+
+        const userExists= await User.findOne({email : email})
+
+        // check if email has already taken
+       if(user.email !== email && userExists){
+
+        res.status(422).json({message: 'Por favor, utilize outro email!'})
         return
+
+       }
+
+       user.email = email
+
+       if(senha != confirmasenha){
+         res.status(422).json({message: 'As senhas não são iguais!'})
+        return
+       }else if(senha === confirmasenha && senha != null){
+
+        //creating password
+        const salt = await bcrypt.genSalt(12)
+        const passwordHash = await bcrypt.hash(senha, salt)
+
+        user.senha = passwordHash
+       }
+       
+       
+       try {
+
+        //returns user updated data
+        const updateUser = await User.findOneAndUpdate({_id:user._id},
+         { $set: user} ,
+         {new: true}, 
+        )
+
+        res.status(200).json({message:'Usuário atualizado com sucesso!'})
+       } catch (error) {
+
+        res.status(500).json({message: err})
+        return
+        
+       }
+
 
     }
 }

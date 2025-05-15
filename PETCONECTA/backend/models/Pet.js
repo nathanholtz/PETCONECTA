@@ -8,7 +8,7 @@ const Pet = mongoose.model(
             type: String,
             required: true
         },
-        age:{
+        idade:{
             type: Number,
             required: true
         },
@@ -21,15 +21,15 @@ const Pet = mongoose.model(
             required: true
 
         },
-        imagem:{
+        image:{
             type:Array,
             required:true
         },  
         status:{
-            Type: Boolean,
-            required: true
+            type: Boolean,
+            //required: true
         },
-        User: Object,
+        user: Object,
         adopter: Object
     },
     {timestamps: true})
