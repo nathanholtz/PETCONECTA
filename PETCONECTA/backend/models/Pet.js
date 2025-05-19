@@ -25,7 +25,7 @@ const Pet = mongoose.model(
             type:Array,
             required:true
         },  
-        status:{
+        disponivel:{
             type: Boolean,
             //required: true
         },
