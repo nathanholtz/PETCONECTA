@@ -1,0 +1,113 @@
+.cadastro-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.cadastro-title {
+    font-size: 2.5rem;
+    color: #00C7BE;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.cadastro-form {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.cadastro-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.cadastro-input:focus {
+    border-color: #00C7BE;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 88, 100, 0.2);
+}
+
+.cadastro-input.error {
+    border-color: #e74c3c;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: block;
+}
+
+.obrigatorio-notice {
+    margin-top: -10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #777;
+    text-align: right;
+}
+
+.cadastro-button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(to right, #ff7e5f, #00C7BE);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cadastro-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 88, 100, 0.4);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .cadastro-title {
+        font-size: 2rem;
+    }
+    
+    .cadastro-form {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cadastro-container {
+        padding: 15px;
+    }
+    
+    .cadastro-title {
+        font-size: 1.8rem;
+    }
+    
+    .cadastro-input,
+    .cadastro-button {
+        padding: 12px;
+    }
+}
