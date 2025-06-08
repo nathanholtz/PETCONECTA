@@ -11,12 +11,22 @@ const getUserByToken = require('../helpers/get-user-by-token')
 module.exports = class UserController{
     static async register(req,res) {
 
-        const {nome, email, senha, telefone, confirmasenha} = req.body
+        const {nome, email, senha, telefone, confirmasenha, endereco,cidade, cep, uf, tipo} = req.body
 
         //validations
         if(!nome){
             res.status(422).json({message: 'O nome é obrigatório!'})
             return
+        }
+
+        if (!endereco) {
+        res.status(422).json({ message: 'O endereço é obrigatório!' });
+        return;
+        }
+
+        if (!tipo) {
+        res.status(422).json({ message: 'O tipo é obrigatório!' });
+        return;
         }
 
         if(!email){
@@ -57,6 +67,12 @@ module.exports = class UserController{
             email: email,
             telefone: telefone,
             senha: passwordHash,
+            endereco: endereco,
+            uf: uf,
+            cidade: cidade,
+            cep: cep,
+            tipo: tipo
+
         })
 
         try {
@@ -66,7 +82,7 @@ module.exports = class UserController{
             await createUsertoken(newUser, req, res)
 
         } catch (error) {
-            res.status(500).json({message: error})
+            res.status(500).json({message: error.message})
         }
     }
 
@@ -144,7 +160,19 @@ module.exports = class UserController{
         
        const id = req.params.id
 
-       const {nome, email, telefone, senha, confirmasenha} = req.body
+       const {
+        nome,
+        email,
+        telefone,
+        senha,
+        confirmasenha,
+        cep,
+        cidade,
+        uf,
+        endereco,
+        complemento,
+        tipo
+    } = req.body;
 
         //check if user exists
         const token = getToken(req)
@@ -192,6 +220,13 @@ module.exports = class UserController{
         user.senha = passwordHash
        }
        
+        user.telefone = telefone;
+        user.cep = cep;
+        user.cidade = cidade;
+        user.uf = uf;
+        user.endereco = endereco;
+        user.complemento = complemento
+        user.tipo = tipo;
        
        try {
 
@@ -201,7 +236,7 @@ module.exports = class UserController{
          {new: true}, 
         )
 
-        res.status(200).json({message:'Usuário atualizado com sucesso!'})
+        res.status(200).json({message:'Usuário atualizado com sucesso!', user: updateUser})
        } catch (error) {
 
         res.status(500).json({message: err})

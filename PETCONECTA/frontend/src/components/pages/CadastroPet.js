@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../estilos/CadastroPet.css';
-import { FaPlus, FaCamera } from 'react-icons/fa';
+import { FaCamera } from 'react-icons/fa';
 
 function CadastroPet() {
     const navigate = useNavigate();
@@ -9,14 +9,17 @@ function CadastroPet() {
         nome: '',
         status: 'Disponível para adoção',
         idade: '',
-        porte: 'M',
+        tipo: '',
+        porte: '',
         genero: 'Macho',
         temperamento: '',
         cuidados: '',
         descricao: '',
+        peso: '',
+        cor: '',
         fotos: []
     });
-    
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setPetData(prev => ({
@@ -24,17 +27,18 @@ function CadastroPet() {
             [name]: value
         }));
     };
-    
+
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
-            const newPhoto = URL.createObjectURL(e.target.files[0]);
+            const file = e.target.files[0];
+            const preview = URL.createObjectURL(file);
             setPetData(prev => ({
                 ...prev,
-                fotos: [...prev.fotos, newPhoto]
+                fotos: [...prev.fotos, { file, preview }]
             }));
         }
     };
-    
+
     const removePhoto = (index) => {
         setPetData(prev => {
             const newPhotos = [...prev.fotos];
@@ -42,201 +46,152 @@ function CadastroPet() {
             return { ...prev, fotos: newPhotos };
         });
     };
-    
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Dados do pet:', petData);
-        // Aqui você faria a chamada API para salvar o pet
-        alert('Pet cadastrado com sucesso!');
-        navigate('/meus-pets'); // Redireciona para a lista de pets
+
+        const formData = new FormData();
+        formData.append('nome', petData.nome);
+        formData.append('tipo', petData.tipo);
+        formData.append('status', petData.status);
+        formData.append('idade', petData.idade);
+        formData.append('peso', petData.peso);
+        formData.append('cor', petData.cor);
+        formData.append('porte', petData.porte);
+        formData.append('genero', petData.genero);
+        formData.append('cuidados', petData.cuidados);
+        formData.append('descricao', petData.descricao);
+
+        petData.fotos.forEach((photo) => {
+            formData.append('image', photo.file);
+        });
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/pets/create', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert('Pet cadastrado com sucesso!');
+                navigate('/pets/mypets');
+            } else {
+                alert(data.message || 'Erro ao cadastrar pet!');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao conectar com o servidor.');
+        }
     };
 
     return (
         <div className="cadastro-pet-container">
             <h1 className="cadastro-pet-title">CADASTRO-PET</h1>
-            
             <form onSubmit={handleSubmit} className="cadastro-pet-form">
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Nome do Pet</label>
-                        <input
-                            type="text"
-                            name="nome"
-                            value={petData.nome}
-                            onChange={handleChange}
-                            required
-                            placeholder="Digite o nome do pet"
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Status</label>
-                        <select 
-                            name="status" 
-                            value={petData.status} 
-                            onChange={handleChange}
-                        >
-                            <option value="Disponível para adoção">Disponível para adoção</option>
-                            <option value="Em processo de adoção">Em processo de adoção</option>
-                            <option value="Adotado">Adotado</option>
-                        </select>
+
+                <div className="form-group">
+                    <label>Nome do Pet</label>
+                    <input type="text" name="nome" value={petData.nome} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                    <label>Tipo do Animal</label>
+                    <div className="radio-group">
+                        {['Cachorro', 'Gato', 'Coelho', 'Pássaro', 'Outro'].map((tipo) => (
+                            <label key={tipo}>
+                                <input
+                                    type="radio"
+                                    name="tipo"
+                                    value={tipo}
+                                    checked={petData.tipo === tipo}
+                                    onChange={handleChange}
+                                />
+                                {tipo}
+                            </label>
+                        ))}
                     </div>
                 </div>
-                
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Idade</label>
-                        <input
-                            type="text"
-                            name="idade"
-                            value={petData.idade}
-                            onChange={handleChange}
-                            placeholder="Ex: 2 anos"
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Porte</label>
-                        <div className="radio-group">
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="porte"
-                                    value="P"
-                                    checked={petData.porte === 'P'}
-                                    onChange={handleChange}
-                                />
-                                P
+
+                <div className="form-group">
+                    <label>Status</label>
+                    <select name="status" value={petData.status} onChange={handleChange}>
+                        <option value="Disponível para adoção">Disponível para adoção</option>
+                        <option value="Em processo de adoção">Em processo de adoção</option>
+                        <option value="Adotado">Adotado</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                    <label>Idade</label>
+                    <input type="text" name="idade" value={petData.idade} onChange={handleChange} />
+                </div>
+
+                <div className="form-group">
+                    <label>Peso (kg)</label>
+                    <input type="number" name="peso" value={petData.peso} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                    <label>Cor</label>
+                    <input type="text" name="cor" value={petData.cor} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                    <label>Porte</label>
+                    <div className="radio-group">
+                        {['P', 'M', 'G'].map((porte) => (
+                            <label key={porte}>
+                                <input type="radio" name="porte" value={porte} checked={petData.porte === porte} onChange={handleChange} />
+                                {porte}
                             </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="porte"
-                                    value="M"
-                                    checked={petData.porte === 'M'}
-                                    onChange={handleChange}
-                                />
-                                M
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="porte"
-                                    value="G"
-                                    checked={petData.porte === 'G'}
-                                    onChange={handleChange}
-                                />
-                                G
-                            </label>
-                        </div>
+                        ))}
                     </div>
                 </div>
-                
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Gênero</label>
-                        <div className="radio-group">
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="genero"
-                                    value="Macho"
-                                    checked={petData.genero === 'Macho'}
-                                    onChange={handleChange}
-                                />
-                                Macho
+
+                <div className="form-group">
+                    <label>Gênero</label>
+                    <div className="radio-group">
+                        {['Macho', 'Fêmea'].map((g) => (
+                            <label key={g}>
+                                <input type="radio" name="genero" value={g} checked={petData.genero === g} onChange={handleChange} />
+                                {g}
                             </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="genero"
-                                    value="Fêmea"
-                                    checked={petData.genero === 'Fêmea'}
-                                    onChange={handleChange}
-                                />
-                                Fêmea
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label>Temperamento</label>
-                        <select 
-                            name="temperamento" 
-                            value={petData.temperamento} 
-                            onChange={handleChange}
-                        >
-                            <option value="">Selecione</option>
-                            <option value="Calmo">Calmo</option>
-                            <option value="Brincalhão">Brincalhão</option>
-                            <option value="Energético">Energético</option>
-                            <option value="Timido">Tímido</option>
-                        </select>
+                        ))}
                     </div>
                 </div>
-                
+
                 <div className="form-group">
                     <label>Cuidados especiais</label>
-                    <input
-                        type="text"
-                        name="cuidados"
-                        value={petData.cuidados}
-                        onChange={handleChange}
-                        placeholder="Ex: Medicamento diário, dieta especial"
-                    />
+                    <input type="text" name="cuidados" value={petData.cuidados} onChange={handleChange} />
                 </div>
-                
-                <div className="form-group">
-                    <label>Comentários</label>
-                    <textarea
-                        name="descricao"
-                        value={petData.descricao}
-                        onChange={handleChange}
-                        placeholder="Detalhes sobre o pet"
-                        rows="3"
-                    ></textarea>
-                </div>
-                
+
                 <div className="form-group">
                     <label>Descrição completa</label>
-                    <textarea
-                        name="descricao"
-                        value={petData.descricao}
-                        onChange={handleChange}
-                        placeholder="Comportamento, personalidade, história..."
-                        rows="5"
-                    ></textarea>
+                    <textarea name="descricao" value={petData.descricao} onChange={handleChange} rows="5" />
                 </div>
-                
+
                 <div className="form-group">
                     <label>Fotos do Pet</label>
                     <div className="photos-container">
                         {petData.fotos.map((photo, index) => (
                             <div key={index} className="photo-preview">
-                                <img src={photo} alt={`Pet ${index}`} />
-                                <button 
-                                    type="button" 
-                                    className="remove-photo"
-                                    onClick={() => removePhoto(index)}
-                                >
-                                    ×
-                                </button>
+                                <img src={photo.preview} alt={`Pet ${index}`} />
+                                <button type="button" className="remove-photo" onClick={() => removePhoto(index)}>×</button>
                             </div>
                         ))}
-                        
                         <label className="add-photo-btn">
                             <FaCamera className="camera-icon" />
                             <span>Adicionar foto</span>
-                            <input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
-                            />
+                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
                         </label>
                     </div>
                 </div>
-                
+
                 <button type="submit" className="configurado-button">
                     + Adicionar
                 </button>

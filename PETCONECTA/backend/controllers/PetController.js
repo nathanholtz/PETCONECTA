@@ -10,11 +10,19 @@ module.exports = class PetController {
     //create a pet
     static async create(req,res){
 
-        const{nome, idade, peso, cor} = req.body
+        const{ nome,
+        tipo,
+        status,
+        idade,
+        peso,
+        cor,
+        porte,
+        genero,
+        cuidados,
+        descricao} = req.body
 
         const image = req.files
 
-        const disponivel = true
 
         //images upload
 
@@ -41,10 +49,15 @@ module.exports = class PetController {
         //create a pet
         const pet = new Pet({
             nome,
-            idade,
-            peso, 
-            cor,  
-            disponivel,
+        tipo,
+        status,
+        idade,
+        peso,
+        cor,
+        porte,
+        genero,
+        cuidados,
+        descricao,
             image:[],
             user:{
                 _id:user._id,
@@ -58,9 +71,13 @@ module.exports = class PetController {
             pet.image.push(image.filename)
         })
 
+        console.log('req.body:', req.body)
+console.log('req.files:', req.files)
+
         try {
 
             const newPet = await pet.save()
+            
             res.status(201).json({message:'Pet cadastrado com sucesso!', newPet})
             
         } catch (error) {
