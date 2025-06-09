@@ -15,6 +15,10 @@ router.get('/mypets', verifyToken, PetController.getAllUserPets)
 
 router.get('/myadoptions', verifyToken, PetController.getAllUserAdoptions)
 
+router.post('/match', verifyToken, PetController.addMatch)
+
+router.get('/match', verifyToken, PetController.getUserMatches)
+
 router.get('/:id', PetController.getPetById)
 
 router.delete('/:id',verifyToken, PetController.removePetById)
@@ -24,5 +28,6 @@ router.patch('/:id', verifyToken, imageUpload.array('image'), PetController.upda
 router.patch('/schedule/:id',verifyToken, PetController.schedule)
 
 router.patch('/conclude/:id', verifyToken, PetController.concludeAdoption)
+
 
 module.exports = router

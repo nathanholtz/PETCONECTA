@@ -12,9 +12,14 @@ const User = mongoose.model(
     endereco: { type: String, required: true },
     complemento: { type: String },
     tipo: { type: String, required: true },
-    cidade: { type: String},
+    cidade: { type: String },
     cep: { type: String, required: true },
-    uf: { type: String},
+    uf: { type: String },
+    matches: [{
+      _id: { type: Schema.Types.ObjectId, ref: 'Pet' },
+      nome: String,
+      image: [String]
+    }]
   }, { timestamps: true })
 );
 

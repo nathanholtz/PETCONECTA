@@ -104,7 +104,7 @@ console.log('req.files:', req.files)
         const token = getToken(req)
         const user = await getUserByToken(token)
 
-        const pets = await Pet.find({'user._id':user._id}).sort('-createAt')
+        const pets = await Pet.find({'user._id':user._id}).sort('-createdAt')
 
         res.status(200).json({
             pets
@@ -340,4 +340,41 @@ console.log('req.files:', req.files)
 
         res.status(200).json({message: 'Parabéns! o ciclo de adoção foi finalizado com sucesso!'})
     }
+
+    static async addMatch(req, res) {
+    const { petId } = req.body
+
+    const token = getToken(req)
+    const user = await getUserByToken(token)
+
+    const pet = await Pet.findById(petId)
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet não encontrado.' })
+    }
+
+    // Evitar duplicatas
+    const alreadyMatched = user.matches.find(m => m._id.equals(pet._id))
+
+    if (alreadyMatched) {
+      return res.status(409).json({ message: 'Este pet já está nos seus matches.' })
+    }
+
+    user.matches.push({
+      _id: pet._id,
+      nome: pet.nome,
+      image: pet.image
+    })
+
+    await user.save()
+
+    res.status(200).json({ message: 'Pet adicionado aos matches com sucesso!' })
+  }
+
+  static async getUserMatches(req, res) {
+    const token = getToken(req)
+    const user = await getUserByToken(token)
+
+    res.status(200).json({ matches: user.matches })
+  }
 }
